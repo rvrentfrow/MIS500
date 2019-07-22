@@ -7,7 +7,7 @@ is functioning properly, and file is loading to GitHub
 
 import pandas as pd   #import analytical module package
 
-#df = DataFrame; input data array values
+
 data_frame = pd.DataFrame({
     'name':['matt','lisa','richard','john','Julia','jane','marlon'],
     'age':[23,78,22,19,45,33,20],
@@ -21,17 +21,20 @@ rows = data_frame.sample(frac=.25)
 
 """
 if statement compares 25% of length of array
-to 25% length of sample to ensure it is equal
-*****
-I'm not sure what this is validating since it 
-only works when the length of the array is even
-*****
+to 25% length of sample to ensure it is a valid sample;
+the validation statement is TRUE whenever the difference 
+between 25% of the array and the sample is less than or 
+equal to zero.  If TRUE, prints total rows and sample rows.
+If FALSE, prints that there is sampling error.  
 """
 
-if 0.25*(len(data_frame)) == len(rows): #I'm not sure what this is validating since it will only work
-    print(len(data_frame), len(rows))
+total_rows = len(data_frame)
 
-print('25% SAMPLE:\n',rows,"\n")
+if ((0.25*total_rows) - len(rows)) <= 0:
+    print("TOTAL ROWS=",len(data_frame), "\nSAMPLE ROWS=",len(rows))
+else:  print("***SAMPLING ERROR***")
+
+print('\n25% SAMPLE:\n',rows,"\n")
 #SUB END:  sample extraction
 
 """split categorical values in array by gender;
