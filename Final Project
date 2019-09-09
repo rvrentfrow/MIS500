@@ -1,0 +1,75 @@
+########## MIS500 PORTFOLIO PROJECT BEGIN ##########
+
+##### Load Data #####
+GenCrash <- read.csv("~/Colorado State University/CSU-Global Graduate/MIS500/FARS2017NationalCSV/Normal Data/Gen_CrashSet.csv", header=TRUE)
+
+MVRCrash <- read.csv("~/Colorado State University/CSU-Global Graduate/MIS500/FARS2017NationalCSV/Normal Data/MVR_CrashSet.csv", header=TRUE)
+#####
+
+##### Load Libraries #####
+library(plyr)  #adds COUNT function
+
+##### Create sub-dataset to calculate the fatality:crash ratio by state
+  
+  #fat_state is the sum of fatalities by state
+fat_state <- aggregate(GenCrash$FATALS,by=list(State=GenCrash$state_name),FUN=sum)
+  
+  #crash_state is the count of crashes by state
+crash_state <- count(GenCrash$state_name)
+
+  #fat_crash is the subset with the fc_ratio calculation
+fat_crash <- data.frame(fat_state,crash_state[,c(2)])
+  names(fat_crash) <- c("state","fats","crash")
+  fat_crash$fc_rat <- fat_crash[,2]/fat_crash[,3]
+
+##### End Sub-datasets
+
+##### summary statistics for fatality per crash ratio by state
+summary(fat_crash$fc_rat)  
+nrow(fat_crash)
+
+##### HYPOTHESIS #1 - Mean Fatalities per Crash
+  ### Histogram for fatality to crash ratio
+  hist(fat_crash$fc_rat,
+       main="Histogram for the Ratio of Fatalities to Crashes by State",
+       xlab = "Fatality to Crash Ratio",
+       border = "black",
+       col="yellow",
+       xlim=c(1,1.2),
+       breaks=10)
+
+  ### Variables for T-test
+  fc_CO <- GenCrash$FATALS[GenCrash$state_name=="Colorado"]
+  fc_WY <- GenCrash$FATALS[GenCrash$state_name=="Wyoming"]
+  fc_US <- GenCrash$FATALS
+  
+  summary(fc_WY)
+
+  summary(fc_US)
+
+    ###Test 1a - Wyoming vs. US
+  t.test(fc_WY,fc_US,"two.sided",paired=FALSE,conf.level = 0.95)
+
+  ###Test 1b - Colorado vs. US
+  t.test(fc_CO,fc_US,"two.sided",paired=FALSE,conf.level = 0.95)
+
+##### END HYPOTHESIS #1
+  
+##### REGRESSION ANALYSIS
+  ### Intersection related accidents with side impact involving 2+ vehicles
+  GenCrash_angle <- GenCrash[GenCrash$VE_TOTAL > "1" & GenCrash$RELJCT2=="1",]
+  angle_mreg=lm(FATALS~MAN_COLL+SPEEDREL+DRUNK_DR,data=GenCrash_angle) 
+  summary(angle_mreg) 
+  
+  ### Crashes with DUI Drivers, Distracted Driver, speed related - all crashes
+  MVRCrash_behavior <- MVRCrash[MVRCrash$VEH_NO=="1" & MVRCrash$PER_TYP=="1",]
+  behav_mreg=lm(FATALS~DRUNK_DR+SPEEDREL+MDRDSTRD,data=MVRCrash_behavior) 
+  summary(behav_mreg) 
+  
+
+  ### Fatalities with Unrestrained occupants
+  MVRCrash_restrain <- MVRCrash
+  restrain_mreg=lm(INJ_SEV~REST_USE+REST_MIS,data = MVRCrash_restrain)
+  summary(restrain_mreg)
+##### END REGRESSION ANALYSIS  
+########## MIS500 PORTFOLIO PROJECT BEGIN ##########  
